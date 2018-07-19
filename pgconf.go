@@ -23,6 +23,17 @@ func newFile(confFile string) *File {
 	}
 }
 
+// Create creates a new empty configuration file.
+func Create(confFile string) (*File, error) {
+	err := ioutil.WriteFile(confFile, nil, 0664)
+	if err != nil {
+		return nil, err
+	}
+	conf := newFile(confFile)
+	conf.data = ""
+	return conf, nil
+}
+
 // Open opens and reads into memory an existing configuration file.
 func Open(confFile string) (*File, error) {
 	bytes, err := ioutil.ReadFile(confFile)
