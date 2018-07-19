@@ -275,7 +275,13 @@ func (f *File) SetInt(key string, value int) error {
 	return f.SetRaw(key, raw)
 }
 
-// SetBool replaces the value of the specified key with true or false
+// SetInt64 replaces the value of the specified key with an unquoted int64 value.
+func (f *File) SetInt64(key string, value int64) error {
+	raw := strconv.FormatInt(value, 10)
+	return f.SetRaw(key, raw)
+}
+
+// SetBool replaces the value of the specified key with true or false.
 func (f *File) SetBool(key string, value bool) error {
 	raw := strconv.FormatBool(value)
 	return f.SetRaw(key, raw)
