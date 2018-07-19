@@ -8,13 +8,14 @@ import (
 	"strings"
 )
 
-// File represents a PostgreSQL configuration file (postgresql.conf)
+// File represents a PostgreSQL configuration file (postgresql.conf).
 type File struct {
 	ConfFile   string
 	Whitespace string
 	data       string
 }
 
+// newFile creates a new File structure with default whitespace settings (space, tab and return).
 func newFile(confFile string) *File {
 	return &File{
 		ConfFile:   confFile,
@@ -22,7 +23,7 @@ func newFile(confFile string) *File {
 	}
 }
 
-// Open opens an existing configuration file.
+// Open opens and reads into memory an existing configuration file.
 func Open(confFile string) (*File, error) {
 	bytes, err := ioutil.ReadFile(confFile)
 	if err != nil {
@@ -128,7 +129,7 @@ func (f *File) parseLine(line string, offset int64) (p *param, err error) {
 	return
 }
 
-// Raw retrieves the raw value of the key, including any quotes
+// Raw retrieves the raw value of the key, including any quotes.
 func (f *File) Raw(key string) (string, error) {
 	p, err := f.findParam(key)
 	if err != nil {
@@ -147,8 +148,8 @@ func (f *File) Raw(key string) (string, error) {
 }
 
 // AsString retrieves the value of the key as a dequoted string.
-// Removes the enclosing single quotes ('syslog' becomes just syslog) and
-// unescapes double quoted ('''users'''), and backslash-quoted ('\'users\'')
+// Removes the enclosing single quotes ('syslog' becomes just syslog),
+// unescapes doubled quoted ('''users''') and backslash-quoted ('\'users\'')
 // values.
 func (f *File) AsString(key string) (string, error) {
 	value, err := f.Raw(key)
@@ -180,7 +181,7 @@ func (f *File) AsInt(key string) (int, error) {
 	return strconv.Atoi(value)
 }
 
-// AsInt64 retrieves the value of the key as a dequoted integer.
+// AsInt64 retrieves the value of the key as a dequoted int64.
 func (f *File) AsInt64(key string) (int64, error) {
 	value, err := f.AsString(key) // Read as string first to dequote the value
 	if err != nil {
@@ -231,7 +232,7 @@ func (f *File) AsFloat64(key string) (float64, error) {
 	return strconv.ParseFloat(value, 64)
 }
 
-// SetRaw replaces the raw value of the specified key (including any quotes)
+// SetRaw replaces the raw value of the specified key (including any quotes).
 func (f *File) SetRaw(key string, value string) error {
 	p, err := f.findParam(key)
 	if err == ErrKeyNotFound {
@@ -256,14 +257,14 @@ func (f *File) SetRaw(key string, value string) error {
 	return nil
 }
 
-// SetString replaces the value of the specified key, enclosing it in single quotes
+// SetString replaces the value of the specified key, enclosing it in single quotes.
 func (f *File) SetString(key string, value string) error {
 	value = strings.Replace(value, "'", "''", -1)
 	raw := "'" + value + "'"
 	return f.SetRaw(key, raw)
 }
 
-// SetInt replaces the value of the specified key with an unquoted integer value
+// SetInt replaces the value of the specified key with an unquoted integer value.
 func (f *File) SetInt(key string, value int) error {
 	raw := strconv.Itoa(value)
 	return f.SetRaw(key, raw)
@@ -275,7 +276,7 @@ func (f *File) SetBool(key string, value bool) error {
 	return f.SetRaw(key, raw)
 }
 
-// SetOnOff replaces the value of the specified key with on or off
+// SetOnOff replaces the value of the specified key with on or off.
 func (f *File) SetOnOff(key string, value bool) error {
 	var raw string
 	if value {
@@ -286,7 +287,7 @@ func (f *File) SetOnOff(key string, value bool) error {
 	return f.SetRaw(key, raw)
 }
 
-// SetYesNo replaces the value of the specified key with yes or no
+// SetYesNo replaces the value of the specified key with yes or no.
 func (f *File) SetYesNo(key string, value bool) error {
 	var raw string
 	if value {
@@ -298,8 +299,8 @@ func (f *File) SetYesNo(key string, value bool) error {
 }
 
 // SetFloat64 replaces the value of the specified key with a floating point number.
-// If you want to write a float with precision of your choice, format it yourself and
-// write it with the SetRaw function.
+// Internally uses fmt.Sprintf("%f") for formatiing. If you want to write a float with
+// precision of your choice, format it yourself and write it with the SetRaw function.
 func (f *File) SetFloat64(key string, value float64) error {
 	raw := fmt.Sprintf("%f", value)
 	return f.SetRaw(key, raw)
