@@ -34,6 +34,11 @@ func Open(confFile string) (*File, error) {
 	return conf, nil
 }
 
+// Save stores to disk the changes made to the in-memory configuration.
+func (f *File) Save() error {
+	return ioutil.WriteFile(f.ConfFile, []byte(f.data), 0)
+}
+
 // findParam performs a case-insensitive search for the given key name,
 // and returns a param structure with the positions to the start and end of
 // the key name and the value.
