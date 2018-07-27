@@ -11,27 +11,29 @@
 
 ```go
 import (
-    "fmt"
+	"fmt"
 
-    "github.com/quasoft/pgconf"
+	"github.com/quasoft/pgconf/conf"
 )
 
-conf, err := pgconf.Open("/data/postgresql.conf")
-if err != nil {
-    panic("Could not open conf file: " + err.Error())
-}
+func main() {
+	c, err := conf.Open("/data/postgresql.conf")
+	if err != nil {
+		panic("Could not open conf file: " + err.Error())
+	}
 
-// .AsString automatically dequotes values
-dest, err := conf.AsString("log_destination")
-if err == pgconf.ErrKeyNotFound || dest != "syslog" {
-    // If key was not set or has the wrong value
-    fmt.Println("log_destination value is not what we want, changing it now")
-    conf.SetString("log_destination", "syslog") // .SetString automatically quotes values
-}
+	// StringK automatically dequotes values
+	dest, err := c.StringK("log_destination")
+	if err != nil || dest != "syslog" {
+		// If key was not set or has the wrong value
+		fmt.Println("log_destination value is not what we want, changing it now")
+		c.SetStringK("log_destination", "syslog") // SetStringK automatically quotes values if necessary
+	}
 
-err = pgconf.Save("/data/postgresql.conf")
-if err != nil {
-    panic("Could not save file: " + err.Error())
+	err = c.WriteFile("/data/postgresql.conf", 0644)
+	if err != nil {
+		panic("Could not save file: " + err.Error())
+	}
 }
 ```
 
@@ -46,29 +48,33 @@ the /tmp directory.
 
 ```go
 import (
-    "fmt"
+	"fmt"
+	"os"
 
-    "github.com/quasoft/pgconf"
+	"github.com/quasoft/pgconf/conf"
 )
 
-conf, err := pgconf.Open("/data/postgresql.conf")
-if err != nil {
-    panic("Could not open conf file: " + err.Error())
+func main() {
+	c, err := conf.Open("/data/postgresql.conf")
+	if err != nil {
+		panic("Could not open conf file: " + err.Error())
+	}
+
+	dest, err := c.StringK("log_destination")
+	if err != nil || dest != "syslog" {
+		fmt.Println("log_destination value is not what we want, changing it now")
+		c.SetStringK("log_destination", "syslog")
+	}
+
+	err = c.WriteFile("/data/postgresql.conf.tmp", 0644)
+	if err != nil {
+		panic("Could not save file: " + err.Error())
+	}
+
+	err = os.Rename("/data/postgresql.conf.tmp", "/data/postgresql.conf")
+	if err != nil {
+		panic("Could not rename tmp file to conf: " + err.Error())
+	}
 }
 
-dest, err := conf.AsString("log_destination")
-if err == pgconf.ErrKeyNotFound || dest != "syslog" {
-    fmt.Println("log_destination value is not what we want, changing it now")
-    conf.SetString("log_destination", "syslog")
-}
-
-err = pgconf.Save("/data/postgresql.conf.tmp")
-if err != nil {
-    panic("Could not save to tmp file: " + err.Error())
-}
-
-err = os.Rename("/data/postgresql.conf.tmp", "/data/postgresql.conf")
-if err != nil {
-    panic("Could not rename tmp file to conf: " + err.Error())
-}
 ```
