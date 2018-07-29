@@ -1,6 +1,7 @@
 package hba
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -17,7 +18,10 @@ const (
 	Method
 )
 
-// newParams creates param structure with defaults suitable for parsing of pg_hba.conf files:
+// ErrEmptyArgument if trying to append an incomplete entry
+var ErrEmptyArgument = errors.New("empty value")
+
+// NewParams creates param structure with defaults suitable for parsing of pg_hba.conf files:
 //  - Whitespace:             space, tab and carriage return
 //  - DefaultDelim: 		  tab
 //  - Quotes:                 " and '
@@ -25,7 +29,7 @@ const (
 //  - DefaultQuote:           "
 //  - InlineComment:          #
 //  - AlwaysQuoteStrings:	  false
-func newParams() generic.Params {
+func NewParams() generic.Params {
 	return generic.Params{
 		Whitespace:             " \t\r",
 		DefaultDelim:           "\t",
@@ -42,10 +46,10 @@ type Conf struct {
 	*generic.Conf
 }
 
-// New creates a new structure for reading/writing to pg_hba.conf files with default params (see newParams).
+// New creates a new structure for reading/writing to pg_hba.conf files with default params (see NewParams).
 func New(conf string) *Conf {
 	return &Conf{
-		generic.New(conf, newParams()),
+		generic.New(conf, NewParams()),
 	}
 }
 
