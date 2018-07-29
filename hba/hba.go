@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 
 	"github.com/quasoft/pgconf/generic"
 )
@@ -103,24 +104,14 @@ func (c *Conf) LookupAll(keyCol int, key string) ([]*generic.Row, error) {
 	return rows, nil
 }
 
-// Append adds a new row with the given values and returns a Row structure describing the
-// line appended.
-func (c *Conf) Append(connType, database, user, address, method string) (*Row, error) {
-	c.EnsureEndsWithEOL()
-
-	line := ""
-	for i, val := range values {
-		if i > 0 {
-			line += c.params.DefaultDelim
-		}
-		line += val
+// AppendEntry adds a new row with the given values and returns a Row
+// structure describing the line appended.
+func (c *Conf) AppendEntry(connType, database, user, address, method string) (*generic.Row, error) {
+	isSpace := func(value string) bool {
+		return strings.TrimSpace(value) == ""
 	}
-
-	writePos := len(c.conf)
-	row, err := c.parseLine(line, writePos)
-	if err != nil {
-		return nil, errors.New("FAILED to parse the line that was about to be appended")
+	if isSpace(connType) || isSpace(database) || isSpace(user) || isSpace(address) || isSpace(method) {
+		return nil, ErrEmptyArgument
 	}
-	c.conf += line
-	return row, nil
+	return c.Append(connType, database, user, address, method)
 }
