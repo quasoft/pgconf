@@ -15,10 +15,10 @@ func openTestFile(t *testing.T, testFile string) *conf.Conf {
 	filename := filepath.Join("testdata", testFile)
 	conf, err := conf.Open(filename)
 	if err != nil {
-		t.Fatalf(`Open("testdata/postgresql.conf") failed: %s`, err)
+		t.Fatalf(`Open("testdata/%s") failed: %s`, testFile, err)
 	}
 	if conf == nil {
-		t.Fatalf(`Open("testdata/postgresql.conf") = nil, want not nil`)
+		t.Fatalf(`Open("testdata/%s") = nil, want not nil`, testFile)
 	}
 	return conf
 }
@@ -35,7 +35,7 @@ func readTestFile(t *testing.T, testFile string) string {
 	filename := filepath.Join("testdata", testFile)
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
-		t.Fatalf(`Open("testdata/postgresql.conf") failed: %s`, err)
+		t.Fatalf(`Open("testdata/%s") failed: %s`, testFile, err)
 	}
 	return string(bytes)
 }
@@ -58,7 +58,7 @@ func TestOpen_NotExisting(t *testing.T) {
 	filename := filepath.Join("testdata", "thereisnosuchfile.conf")
 	_, err := conf.Open(filename)
 	if err == nil {
-		t.Errorf(`Open("testdata/postgresql.conf") should have failed with error`)
+		t.Errorf(`Open("testdata/thereisnosuchfile.conf") should have failed with error`)
 	}
 }
 
@@ -73,7 +73,7 @@ func TestOpenReader(t *testing.T) {
 		t.Fatalf(`OpenReader() failed: %s`, err)
 	}
 	if conf == nil {
-		t.Fatalf(`Open("testdata/postgresql.conf") = nil, want not nil`)
+		t.Fatalf(`OpenReader("testdata/postgresql.conf") = nil, want not nil`)
 	}
 }
 
