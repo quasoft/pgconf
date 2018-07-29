@@ -1,4 +1,4 @@
-package pghba
+package hba
 
 import (
 	"fmt"
