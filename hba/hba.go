@@ -8,12 +8,13 @@ import (
 	"github.com/quasoft/pgconf/generic"
 )
 
+// Constants for column indexes
 const (
-	typeCol = iota
-	databaseCol
-	userCol
-	addressCol
-	methodCol
+	ConnType = iota
+	Database
+	User
+	Address
+	Method
 )
 
 // newParams creates param structure with defaults suitable for parsing of pg_hba.conf files:
@@ -119,9 +120,3 @@ func (c *Conf) Append(connType, database, user, address, method string) (*Row, e
 	c.conf += line
 	return row, nil
 }
-
-typeCol = iota
-databaseCol
-userCol
-addressCol
-methodCol
