@@ -9,7 +9,7 @@
 
 ## How to use
 
-### `postgresql.conf`:
+### postgresql.conf:
 
 To read or update `postgresql.conf` files use the `pgconf/conf` package:
 
@@ -41,7 +41,7 @@ func main() {
 }
 ```
 
-### `pg_hba.conf`
+### pg_hba.conf
 
 To read or update `pg_hba.conf` files use the `pgconf/hba` package:
 
@@ -77,6 +77,16 @@ func main() {
 	}
 }
 ```
+
+outputs:
+
+```bash
+Found 3 replication rows with addresses as follows:
+ - 127.0.0.1/32
+ - ::1/128
+ - 10.0.0.3/32
+```
+
 
 ## Hint
 
