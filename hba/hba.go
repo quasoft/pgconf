@@ -20,7 +20,7 @@ const (
 )
 
 // ErrEmptyArgument if trying to append an incomplete entry
-var ErrEmptyArgument = errors.New("empty value")
+var ErrEmptyArgument = errors.New("empty argument")
 
 // NewParams creates param structure with defaults suitable for parsing of pg_hba.conf files:
 //  - Whitespace:             space, tab and carriage return
