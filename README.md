@@ -9,6 +9,10 @@
 
 ## How to use
 
+### `postgresql.conf`:
+
+To read or update `postgresql.conf` files use the `pgconf/conf` package:
+
 ```go
 import (
 	"fmt"
@@ -37,35 +41,50 @@ func main() {
 }
 ```
 
-## Hint
+### `pg_hba.conf`
 
-Usually it's safer to write changes to a temp file and once that writing is over to rename
-the temp file to postgresql.conf (or whatever you've named yours).
-
-What follows is an example of this use case. If you use this make sure to store the temp
-file in a secure location (eg. the data dir) with restricted permissions and not inside
-the /tmp directory.
+To read or update `pg_hba.conf` files use the `pgconf/hba` package:
 
 ```go
+package main
+
 import (
 	"fmt"
-	"os"
 
-	"github.com/quasoft/pgconf/conf"
+	"github.com/quasoft/pgconf/hba"
 )
 
 func main() {
-	c, err := conf.Open("/data/postgresql.conf")
+	conf, err := hba.Open("../../hba/testdata/sample.conf") // pg_hba.conf
 	if err != nil {
-		panic("Could not open conf file: " + err.Error())
+		panic(fmt.Errorf("Failed opening file pg_hba.conf: %s", err))
 	}
 
-	dest, err := c.StringK("log_destination")
-	if err != nil || dest != "syslog" {
-		fmt.Println("log_destination value is not what we want, changing it now")
-		c.SetStringK("log_destination", "syslog")
+	// Find all rows for replication host-based authentication
+	rows, err := conf.LookupAll(hba.Database, "replication")
+	if err != nil {
+		panic(fmt.Errorf("Failed looking up for replication rows: %s", err))
 	}
 
+	fmt.Printf("Found %d replication rows with addresses as follows:\n", len(rows))
+	for _, row := range rows {
+		// Get and print value for ADDRESS column
+		address, err := conf.String(row, hba.Address)
+		if err != nil {
+			panic(fmt.Errorf("Could not read address value: %s", err))
+		}
+		fmt.Println(" - " + address)
+	}
+}
+```
+
+## Hint
+
+Usually it's safer to write changes to a temp file and once that writing is over to rename
+the temp file to the actual configuration file:
+
+```go
+	...
 	err = c.WriteFile("/data/postgresql.conf.tmp", 0644)
 	if err != nil {
 		panic("Could not save file: " + err.Error())
@@ -75,6 +94,9 @@ func main() {
 	if err != nil {
 		panic("Could not rename tmp file to conf: " + err.Error())
 	}
+	...
 }
-
 ```
+
+If you use this approach make sure to store the temp file in a secure location (eg. the data
+dir) with restricted permissions and not inside the `/tmp` directory.
